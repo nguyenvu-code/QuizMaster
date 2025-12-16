@@ -1,8 +1,10 @@
 FROM node:20-alpine AS base
 
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl libc6-compat
+
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
@@ -15,7 +17,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Prisma Client
-RUN npx prisma@5.22.0 generate
+RUN npx prisma generate
 
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
@@ -46,5 +48,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Skip prisma migrate, just start the app (SQLite file will be created)
 CMD ["node", "server.js"]
