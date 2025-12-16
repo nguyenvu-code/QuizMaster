@@ -15,7 +15,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Prisma Client
-RUN npx prisma generate
+RUN npx prisma@5.22.0 generate
 
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
@@ -34,6 +34,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 # Create data directory for SQLite
 RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
@@ -44,4 +46,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+# Skip prisma migrate, just start the app (SQLite file will be created)
+CMD ["node", "server.js"]
