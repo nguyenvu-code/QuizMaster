@@ -16,12 +16,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Set DATABASE_URL for build
-ENV DATABASE_URL="file:./prisma/dev.db"
-
 # Generate Prisma Client and create empty database
 RUN npx prisma generate
-RUN npx prisma db push --accept-data-loss
+RUN DATABASE_URL="file:./prisma/dev.db" npx prisma db push --accept-data-loss
 
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
