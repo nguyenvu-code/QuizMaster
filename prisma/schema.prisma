@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Exam {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  duration    Int        @default(30)
+  difficulty  String     @default("medium")
+  isPublished Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  questions   Question[]
+  attempts    Attempt[]
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  examId      String
+  content     String
+  explanation String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  exam        Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  options     Option[]
+  answers     Answer[]
+}
+
+model Option {
+  id         String   @id @default(cuid())
+  questionId String
+  label      String
+  content    String
+  isCorrect  Boolean  @default(false)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answers    Answer[]
+}
+
+model Attempt {
+  id          String    @id @default(cuid())
+  examId      String
+  userId      String?
+  score       Int?
+  totalScore  Int?
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+  exam        Exam      @relation(fields: [examId], references: [id], onDelete: Cascade)
+  answers     Answer[]
+}
+
+model Answer {
+  id               String   @id @default(cuid())
+  attemptId        String
+  questionId       String
+  selectedOptionId String?
+  isCorrect        Boolean?
+  attempt          Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question         Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOption   Option?  @relation(fields: [selectedOptionId], references: [id])
+}

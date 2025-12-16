@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QuizMaster - Nền tảng thi trắc nghiệm với AI
 
-## Getting Started
+Ứng dụng web tạo và làm bài thi trắc nghiệm hiện đại, hỗ trợ tạo đề tự động bằng AI.
 
-First, run the development server:
+## Tính năng
+
+- 📝 **Tạo đề thi**: Upload file (TXT, PDF, DOCX) hoặc nhập văn bản → AI tự động tạo câu hỏi
+- ✏️ **Chỉnh sửa đề**: Review, sửa câu hỏi, xáo trộn đáp án, xuất JSON
+- 📊 **Làm bài thi**: Timer, điều hướng câu hỏi, đánh dấu xem lại, auto-save
+- 📈 **Xem kết quả**: Điểm số, phân tích, xem lại đáp án với giải thích
+- 🎛️ **Dashboard**: Quản lý đề thi, thống kê, câu hỏi sai nhiều nhất
+
+## Tech Stack
+
+- **Frontend**: Next.js 15 (App Router), TypeScript, TailwindCSS
+- **UI**: Custom components với glassmorphism, Framer Motion animations
+- **Backend**: Next.js Route Handlers
+- **Database**: SQLite + Prisma ORM
+- **AI**: Adapter pattern hỗ trợ OpenAI/Claude/Gemini (mock provider mặc định)
+
+## Cài đặt
 
 ```bash
+# Clone và cài dependencies
+cd quiz-app
+npm install
+
+# Tạo database và seed data
+npx prisma migrate dev
+npm run db:seed
+
+# Chạy development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mở http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Cấu hình AI (tùy chọn)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Tạo file `.env` và thêm API key:
 
-## Learn More
+```env
+DATABASE_URL="file:./dev.db"
+LLM_PROVIDER="openai"  # mock | openai | claude | gemini
+OPENAI_API_KEY="sk-..."
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Cấu trúc dự án
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+quiz-app/
+├── prisma/
+│   ├── schema.prisma    # Database schema
+│   └── seed.ts          # Sample data
+├── src/
+│   ├── app/
+│   │   ├── api/         # API routes
+│   │   ├── create/      # Trang tạo đề
+│   │   ├── dashboard/   # Trang quản lý
+│   │   └── exam/[id]/   # Làm bài, sửa đề, kết quả
+│   ├── components/
+│   │   ├── ui/          # Base components
+│   │   └── *.tsx        # Feature components
+│   └── lib/
+│       ├── llm/         # AI providers
+│       ├── parsers/     # File parsers
+│       └── *.ts         # Utils, store, validations
+└── README.md
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API Endpoints
 
-## Deploy on Vercel
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET | `/api/exams` | Danh sách đề thi |
+| POST | `/api/exams` | Tạo đề mới |
+| GET | `/api/exams/[id]` | Chi tiết đề |
+| PUT | `/api/exams/[id]` | Cập nhật đề |
+| DELETE | `/api/exams/[id]` | Xóa đề |
+| POST | `/api/generate` | Tạo đề bằng AI |
+| POST | `/api/attempts` | Nộp bài |
+| GET | `/api/attempts/[id]` | Kết quả làm bài |
+| GET | `/api/dashboard/stats` | Thống kê |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev        # Development server
+npm run build      # Production build
+npm run db:migrate # Chạy migrations
+npm run db:seed    # Seed sample data
+npm run db:reset   # Reset database
+```
